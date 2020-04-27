@@ -95,9 +95,12 @@ public class Coluna {
 					case "ntext":
 						rs = this.getNome() + " TEXT" + (!this.isNullable() ? " NOT NULL" : " NULL");
 						break;
+					case "uniqueidentifier":
+						rs = this.getNome() + " VARCHAR(99)" + (!this.isNullable() ? " NOT NULL" : " NULL");
+						break;
 					default:
 						rs = this.getNome() + " " + this.getTipo() + "("
-								+ (this.getTamanho() > 9999 ? 9999 : this.getTamanho()) + ")"
+								+ (Math.min(this.getTamanho(), 9999)) + ")"
 								+ (!this.isNullable() ? " NOT NULL" : " NULL");
 						break;
 				}
@@ -113,26 +116,23 @@ public class Coluna {
 			switch (this.getFontDad()) {
 				case SQLServer:
 					str = rs.getString(this.getNome().replace("[", "").replace("]", "")).replace("'", "");
-					if (str != null) {
-						switch (this.getTipo()) {
-							case "char":
-							case "varchar":
-							case "nchar":
-							case "nvarchar":
-							case "date":
-							case "time":
-							case "datetime":
-							case "smalldatetime":
-							case "timestamp":
-							case "varbinary":
-							case "text":
-							case "ntext":
-							case "image":
-								str = "'" + str + "'";
-								break;
-						}
-					} else {
-						str = str == null ? "null" : str;
+					switch (this.getTipo()) {
+						case "char":
+						case "varchar":
+						case "nchar":
+						case "nvarchar":
+						case "date":
+						case "time":
+						case "datetime":
+						case "smalldatetime":
+						case "timestamp":
+						case "varbinary":
+						case "text":
+						case "ntext":
+						case "image":
+						case "uniqueidentifier":
+							str = "'" + str + "'";
+							break;
 					}
 					break;
 			}
