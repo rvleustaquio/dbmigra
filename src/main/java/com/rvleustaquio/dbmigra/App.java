@@ -73,6 +73,9 @@ public class App extends javax.swing.JFrame {
     private JButton btnSyBase9RemoveUm;
 
     private JLabel lblInicio;
+    private JLabel lblConfiguracoes;
+    private JLabel lblPrefixo;
+    private JLabel lblFiltro;
     private JLabel lblFonteDados;
     private JLabel lblFonteDadosHost;
     private JLabel lblFonteDadosUsuario;
@@ -89,6 +92,8 @@ public class App extends javax.swing.JFrame {
     private JLabel lblQntTabelas;
     private JLabel lblQntLinhas;
 
+    private JTextField txtPrefixo;
+    private JTextField txtFiltro;
     private JTextField txtFonteDadosHost;
     private JTextField txtFonteDadosUsuario;
     private JTextField txtFonteDadosSenha;
@@ -99,6 +104,7 @@ public class App extends javax.swing.JFrame {
 
     private JComboBox<String> cbxFonteDadosBanco;
 
+    private JSeparator sepConfiguracoes;
     private JSeparator sepFonteDados;
     private JSeparator sepSyBase9;
 
@@ -113,10 +119,6 @@ public class App extends javax.swing.JFrame {
 
     private JProgressBar prbMigracaoLinhas;
     private JProgressBar prbMigracaoTabelas;
-    private JLabel lblConfiguracoes;
-    private JTextField txtPrefixo;
-    private JSeparator sepConfiguracoes;
-    private JLabel lblPrefixo;
     // endregion
 
     public static void main(String[] args) {
@@ -225,6 +227,16 @@ public class App extends javax.swing.JFrame {
         txtPrefixo.setBounds(317, 214, 127, 20);
         txtPrefixo.setColumns(10);
         pnlInicio.add(txtPrefixo);
+
+        lblFiltro = new JLabel("Filtro:");
+        lblFiltro.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblFiltro.setBounds(181, 245, 126, 14);
+        pnlInicio.add(lblFiltro);
+
+        txtFiltro = new JTextField("_aud");
+        txtFiltro.setBounds(317, 242, 127, 20);
+        txtFiltro.setColumns(10);
+        pnlInicio.add(txtFiltro);
 
         pnlFonteDados = new JPanel();
         pnlFonteDados.setBounds(144, 0, 630, 413);
@@ -711,15 +723,16 @@ public class App extends javax.swing.JFrame {
             DefaultListModel<Tabela> tabsFontDad = new DefaultListModel<>();
             DefaultListModel<Tabela> tabsSyBase9 = new DefaultListModel<>();
             while (rsTab.next()) {
-                Tabela tabela = new Tabela(rsTab.getString("TABLE_SCHEM"), rsTab.getString("TABLE_NAME"),
-                        txtPrefixo.getText());
-                ResultSet rsCol = md.getColumns(null, tabela.getSchema(), tabela.getNome(), null);
-                Coluna col;
-                while (rsCol.next()) {
-                    col = new Coluna(FontDad.SQLServer, rsCol);
-                    tabela.adicCol(col);
+                if (!rsTab.getString("TABLE_NAME").toLowerCase().contains(txtFiltro.getText().toLowerCase()) && !rsTab.getString("TABLE_SCHEM").equals("sys")) {
+                    Tabela tabela = new Tabela(rsTab.getString("TABLE_SCHEM"), rsTab.getString("TABLE_NAME"), txtPrefixo.getText());
+                    ResultSet rsCol = md.getColumns(null, tabela.getSchema(), tabela.getNome(), null);
+                    Coluna col;
+                    while (rsCol.next()) {
+                        col = new Coluna(FontDad.SQLServer, rsCol);
+                        tabela.adicCol(col);
+                    }
+                    tabsFontDad.addElement(tabela);
                 }
-                tabsFontDad.addElement(tabela);
             }
             lstFonteDados.setModel(tabsFontDad);
             lstSyBase9.setModel(tabsSyBase9);
@@ -753,6 +766,9 @@ public class App extends javax.swing.JFrame {
 
                     prbMigracaoTabelas.setValue(prbMigracaoTabelas.getValue() + 1);
                     prbMigracaoTabelas.setString(tabela.toString() + " (" + (prbMigracaoTabelas.getValue() * 100) / tabsSyBase9Count + "%)");
+
+                    prbMigracaoLinhas.setValue(0);
+                    prbMigracaoLinhas.setString("");
 
                     try (
                             Statement stmtFontDad = connFontDad.createStatement()
