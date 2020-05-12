@@ -539,7 +539,7 @@ public class App extends javax.swing.JFrame {
                     String Url = "jdbc:sqlserver://" + txtFonteDadosHost.getText() + ":1433;DatabaseName="
                             + cbxFonteDadosBanco.getSelectedItem().toString() + ";user="
                             + txtFonteDadosUsuario.getText() + ";Password=" + txtFonteDadosSenha.getText()
-                            + ";CharacterSet=iso-8859-1";
+                            + ";CharacterSet=UTF-8";
 
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 

@@ -1,6 +1,7 @@
 package com.rvleustaquio.dbmigra.model;
 
 import com.rvleustaquio.dbmigra.enums.FontDad;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -28,7 +29,7 @@ public class Coluna {
 					this.nullable = true;
 					break;
 			}
-		} catch (SQLException e) {
+		} catch (SQLException ignored) {
 		}
 	}
 
@@ -48,8 +49,8 @@ public class Coluna {
 		return tamanho;
 	}
 
-	public boolean isNullable() {
-		return nullable;
+	public boolean isNotNullable() {
+		return !nullable;
 	}
 
 	public int getPrecisao() {
@@ -78,30 +79,30 @@ public class Coluna {
 					case "image":
 					case "timestamp":
 					case "real":
-						rs = this.getNome() + " " + this.getTipo() + (!this.isNullable() ? " NOT NULL" : " NULL");
+						rs = this.getNome() + " " + this.getTipo() + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					case "decimal":
 					case "numeric":
 						rs = this.getNome() + " " + this.getTipo() + "(" + this.getTamanho() + "," + this.getPrecisao()
-								+ ")" + (!this.isNullable() ? " NOT NULL" : " NULL");
+								+ ")" + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					case "nchar":
 					case "nvarchar":
-						rs = this.getNome() + " VARCHAR(9999)" + (!this.isNullable() ? " NOT NULL" : " NULL");
+						rs = this.getNome() + " VARCHAR(9999)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					case "varbinary":
-						rs = this.getNome() + " VARBINARY(9999)" + (!this.isNullable() ? " NOT NULL" : " NULL");
+						rs = this.getNome() + " VARBINARY(9999)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					case "ntext":
-						rs = this.getNome() + " TEXT" + (!this.isNullable() ? " NOT NULL" : " NULL");
+						rs = this.getNome() + " TEXT" + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					case "uniqueidentifier":
-						rs = this.getNome() + " VARCHAR(99)" + (!this.isNullable() ? " NOT NULL" : " NULL");
+						rs = this.getNome() + " VARCHAR(99)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 					default:
 						rs = this.getNome() + " " + this.getTipo() + "("
 								+ (Math.min(this.getTamanho(), 9999)) + ")"
-								+ (!this.isNullable() ? " NOT NULL" : " NULL");
+								+ (this.isNotNullable() ? " NOT NULL" : " NULL");
 						break;
 				}
 				break;
@@ -134,6 +135,7 @@ public class Coluna {
 							str = "'" + str + "'";
 							break;
 					}
+					str = str.replace(Character.toString((char) 65533), "");
 					break;
 			}
 		} catch (Exception e) {
