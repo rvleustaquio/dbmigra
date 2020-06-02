@@ -76,6 +76,7 @@ public class App extends javax.swing.JFrame {
     private JLabel lblConfiguracoes;
     private JLabel lblPrefixo;
     private JLabel lblFiltro;
+    private JLabel lblLinhasBatch;
     private JLabel lblFonteDados;
     private JLabel lblFonteDadosHost;
     private JLabel lblFonteDadosUsuario;
@@ -94,6 +95,7 @@ public class App extends javax.swing.JFrame {
 
     private JTextField txtPrefixo;
     private JTextField txtFiltro;
+    private JTextField txtLinhasBatch;
     private JTextField txtFonteDadosHost;
     private JTextField txtFonteDadosUsuario;
     private JTextField txtFonteDadosSenha;
@@ -237,6 +239,16 @@ public class App extends javax.swing.JFrame {
         txtFiltro.setBounds(317, 242, 127, 20);
         txtFiltro.setColumns(10);
         pnlInicio.add(txtFiltro);
+
+        lblLinhasBatch = new JLabel("Regs/Pacote:");
+        lblLinhasBatch.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblLinhasBatch.setBounds(181, 273, 126, 14);
+        pnlInicio.add(lblLinhasBatch);
+
+        txtLinhasBatch = new JTextField("5000");
+        txtLinhasBatch.setBounds(317, 270, 127, 20);
+        txtLinhasBatch.setColumns(10);
+        pnlInicio.add(txtLinhasBatch);
 
         pnlFonteDados = new JPanel();
         pnlFonteDados.setBounds(144, 0, 630, 413);
@@ -802,7 +814,7 @@ public class App extends javax.swing.JFrame {
 
                             sqlRow.append(tabela.toSQLInsert(rs).toString());
 
-                            if (row == 5000 || rowCount == rowTotal) {
+                            if (row == Integer.parseInt(txtLinhasBatch.getText()) || rowCount == rowTotal) {
                                 stmtSyBase9.close();
                                 stmtSyBase9 = connSyBase9.createStatement();
                                 stmtSyBase9.executeUpdate(sqlRow.toString());
