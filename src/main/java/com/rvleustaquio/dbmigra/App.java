@@ -11,29 +11,16 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.ListModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 
 import com.rvleustaquio.dbmigra.enums.FontDad;
 import com.rvleustaquio.dbmigra.model.Coluna;
+import com.rvleustaquio.dbmigra.model.Direcao;
 import com.rvleustaquio.dbmigra.model.Tabela;
 import com.rvleustaquio.dbmigra.utils.Util;
 
@@ -41,22 +28,23 @@ public class App extends javax.swing.JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private Connection connFontDad;
+    private Connection connSQLServer;
     private Connection connSyBase9;
     private SwingWorker<String, Object> swMig;
     private JPanel pnlOpened;
+    private Direcao direcao;
 
     // region Components Declarations
     private JPanel pnlNav;
     private JPanel pnlFuncs;
     private JPanel pnlInicio;
-    private JPanel pnlFonteDados;
+    private JPanel pnlSQLServer;
     private JPanel pnlSyBase9;
     private JPanel pnlTabelas;
     private JPanel pnlMigracao;
 
     private JToggleButton tgbInicio;
-    private JToggleButton tgbFonteDados;
+    private JToggleButton tgbSQLServer;
     private JToggleButton tgbSyBase9;
     private JToggleButton tgbTabelas;
     private JToggleButton tgbMigracao;
@@ -64,11 +52,11 @@ public class App extends javax.swing.JFrame {
     private JButton btnSair;
     private JButton btnAvancar;
     private JButton btnVoltar;
-    private JButton btnFonteDadosAtualizarBanco;
-    private JButton btnFonteDadosTestarConexao;
+    private JButton btnSQLServerAtualizarBanco;
+    private JButton btnSQLServerTestarConexao;
     private JButton btnSyBase9TestarConexao;
-    private JButton btnFonteDadosAdicionaTodos;
-    private JButton btnFonteDadosAdicionaUm;
+    private JButton btnSQLServerAdicionaTodos;
+    private JButton btnSQLServerAdicionaUm;
     private JButton btnSyBase9RemoveTodos;
     private JButton btnSyBase9RemoveUm;
 
@@ -77,17 +65,18 @@ public class App extends javax.swing.JFrame {
     private JLabel lblPrefixo;
     private JLabel lblFiltro;
     private JLabel lblLinhasBatch;
-    private JLabel lblFonteDados;
-    private JLabel lblFonteDadosHost;
-    private JLabel lblFonteDadosUsuario;
-    private JLabel lblFonteDadosSenha;
-    private JLabel lblFonteDadosBanco;
+    private JLabel lblDirecao;
+    private JLabel lblSQLServer;
+    private JLabel lblSQLServerHost;
+    private JLabel lblSQLServerUsuario;
+    private JLabel lblSQLServerSenha;
+    private JLabel lblSQLServerBanco;
     private JLabel lblSyBase9;
     private JLabel lblSyBase9Host;
     private JLabel lblSyBase9Servico;
     private JLabel lblSyBase9Usuario;
     private JLabel lblSyBase9Senha;
-    private JLabel lblFonteDadosTabelas;
+    private JLabel lblSQLServerTabelas;
     private JLabel lblSyBase9Tabelas;
     private JLabel lblMigracao;
     private JLabel lblQntTabelas;
@@ -96,25 +85,26 @@ public class App extends javax.swing.JFrame {
     private JTextField txtPrefixo;
     private JTextField txtFiltro;
     private JTextField txtLinhasBatch;
-    private JTextField txtFonteDadosHost;
-    private JTextField txtFonteDadosUsuario;
-    private JTextField txtFonteDadosSenha;
+    private JTextField txtSQLServerHost;
+    private JTextField txtSQLServerUsuario;
+    private JTextField txtSQLServerSenha;
     private JTextField txtSyBase9Host;
     private JTextField txtSyBase9Servico;
     private JTextField txtSyBase9Usuario;
     private JTextField txtSyBase9Senha;
 
-    private JComboBox<String> cbxFonteDadosBanco;
+    private JComboBox<String> cbxSQLServerBanco;
+    private JComboBox<Direcao> cbxDirecao;
 
     private JSeparator sepConfiguracoes;
-    private JSeparator sepFonteDados;
+    private JSeparator sepSQLServer;
     private JSeparator sepSyBase9;
 
-    private JScrollPane spFonteDados;
+    private JScrollPane spSQLServer;
     private JScrollPane spSyBase9;
     private JScrollPane spMigracao;
 
-    private JList<Tabela> lstFonteDados;
+    private JList<Tabela> lstSQLServer;
     private JList<Tabela> lstSyBase9;
 
     private JTextArea txaMigracao;
@@ -140,11 +130,22 @@ public class App extends javax.swing.JFrame {
         showPanel(tgbInicio, pnlInicio);
     }
 
+    public static void setUIFont (javax.swing.plaf.FontUIResource f){
+        Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get (key);
+            if (value instanceof javax.swing.plaf.FontUIResource)
+                UIManager.put (key, f);
+        }
+    }
+
     private void initialize() {
         setTitle("DBMIGRA");
         setResizable(false);
         setBounds(100, 100, 780, 490);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setUIFont(new FontUIResource("Arial", Font.PLAIN, 12));
         getContentPane().setLayout(null);
 
         pnlNav = new JPanel();
@@ -158,10 +159,10 @@ public class App extends javax.swing.JFrame {
         tgbInicio.setBounds(10, 11, 125, 23);
         pnlNav.add(tgbInicio);
 
-        tgbFonteDados = new JToggleButton("Fonte de dados");
-        tgbFonteDados.addActionListener(e -> showPanel((JToggleButton) e.getSource(), pnlFonteDados));
-        tgbFonteDados.setBounds(10, 45, 125, 23);
-        pnlNav.add(tgbFonteDados);
+        tgbSQLServer = new JToggleButton("SQL Server");
+        tgbSQLServer.addActionListener(e -> showPanel((JToggleButton) e.getSource(), pnlSQLServer));
+        tgbSQLServer.setBounds(10, 45, 125, 23);
+        pnlNav.add(tgbSQLServer);
 
         tgbSyBase9 = new JToggleButton("SyBase 9");
         tgbSyBase9.addActionListener(e -> showPanel((JToggleButton) e.getSource(), pnlSyBase9));
@@ -250,68 +251,82 @@ public class App extends javax.swing.JFrame {
         txtLinhasBatch.setColumns(10);
         pnlInicio.add(txtLinhasBatch);
 
-        pnlFonteDados = new JPanel();
-        pnlFonteDados.setBounds(144, 0, 630, 413);
-        pnlFonteDados.setLayout(null);
-        pnlFonteDados.setName("pnlFonteDados");
-        getContentPane().add(pnlFonteDados);
+        lblDirecao = new JLabel("Direção:");
+        lblDirecao.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblDirecao.setBounds(181, 301, 126, 14);
+        pnlInicio.add(lblDirecao);
 
-        lblFonteDados = new JLabel("Fonte de Dados");
-        lblFonteDados.setBounds(10, 11, 113, 14);
-        pnlFonteDados.add(lblFonteDados);
+        cbxDirecao = new JComboBox<Direcao>();
+        cbxDirecao.addItem(new Direcao(1, "SQL Server -> SyBase 9"));
+        cbxDirecao.addItem(new Direcao(2, "SyBase 9 -> SQL Server"));
+        cbxDirecao.addActionListener(this::setCbxDirecaoActionPerformed);
+        cbxDirecao.setBounds(317, 298, 170, 20);
+        pnlInicio.add(cbxDirecao);
 
-        lblFonteDadosHost = new JLabel("Host:");
-        lblFonteDadosHost.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFonteDadosHost.setBounds(155, 135, 132, 14);
-        pnlFonteDados.add(lblFonteDadosHost);
+        direcao = (Direcao) cbxDirecao.getSelectedItem();
 
-        txtFonteDadosHost = new JTextField("127.0.0.1\\SQLEXPRESS");
-        txtFonteDadosHost.setBounds(297, 132, 200, 20);
-        txtFonteDadosHost.setColumns(10);
-        pnlFonteDados.add(txtFonteDadosHost);
+        pnlSQLServer = new JPanel();
+        pnlSQLServer.setBounds(144, 0, 630, 413);
+        pnlSQLServer.setLayout(null);
+        pnlSQLServer.setName("pnlSQLServer");
+        getContentPane().add(pnlSQLServer);
 
-        lblFonteDadosUsuario = new JLabel("Usuário:");
-        lblFonteDadosUsuario.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFonteDadosUsuario.setBounds(155, 163, 132, 14);
-        pnlFonteDados.add(lblFonteDadosUsuario);
+        lblSQLServer = new JLabel("SQL Server");
+        lblSQLServer.setBounds(10, 11, 113, 14);
+        pnlSQLServer.add(lblSQLServer);
 
-        txtFonteDadosUsuario = new JTextField("sa");
-        txtFonteDadosUsuario.setColumns(10);
-        txtFonteDadosUsuario.setBounds(297, 160, 200, 20);
-        pnlFonteDados.add(txtFonteDadosUsuario);
+        lblSQLServerHost = new JLabel("Host:");
+        lblSQLServerHost.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblSQLServerHost.setBounds(155, 135, 132, 14);
+        pnlSQLServer.add(lblSQLServerHost);
 
-        lblFonteDadosSenha = new JLabel("Senha:");
-        lblFonteDadosSenha.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFonteDadosSenha.setBounds(155, 191, 132, 14);
-        pnlFonteDados.add(lblFonteDadosSenha);
+        txtSQLServerHost = new JTextField("127.0.0.1\\SQLEXPRESS");
+        txtSQLServerHost.setBounds(297, 132, 200, 20);
+        txtSQLServerHost.setColumns(10);
+        pnlSQLServer.add(txtSQLServerHost);
 
-        txtFonteDadosSenha = new JTextField("b5th4@custom");
-        txtFonteDadosSenha.setColumns(10);
-        txtFonteDadosSenha.setBounds(297, 188, 200, 20);
-        pnlFonteDados.add(txtFonteDadosSenha);
+        lblSQLServerUsuario = new JLabel("Usuário:");
+        lblSQLServerUsuario.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblSQLServerUsuario.setBounds(155, 163, 132, 14);
+        pnlSQLServer.add(lblSQLServerUsuario);
 
-        lblFonteDadosBanco = new JLabel("Banco de Dados:");
-        lblFonteDadosBanco.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFonteDadosBanco.setBounds(155, 219, 132, 14);
-        pnlFonteDados.add(lblFonteDadosBanco);
+        txtSQLServerUsuario = new JTextField("sa");
+        txtSQLServerUsuario.setColumns(10);
+        txtSQLServerUsuario.setBounds(297, 160, 200, 20);
+        pnlSQLServer.add(txtSQLServerUsuario);
 
-        cbxFonteDadosBanco = new JComboBox<>();
-        cbxFonteDadosBanco.setBounds(297, 217, 200, 20);
-        pnlFonteDados.add(cbxFonteDadosBanco);
+        lblSQLServerSenha = new JLabel("Senha:");
+        lblSQLServerSenha.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblSQLServerSenha.setBounds(155, 191, 132, 14);
+        pnlSQLServer.add(lblSQLServerSenha);
 
-        btnFonteDadosAtualizarBanco = new JButton("...");
-        btnFonteDadosAtualizarBanco.addActionListener(this::btnFonteDadosAtualizarBancoActionPerformed);
-        btnFonteDadosAtualizarBanco.setBounds(507, 217, 22, 20);
-        pnlFonteDados.add(btnFonteDadosAtualizarBanco);
+        txtSQLServerSenha = new JTextField("b5th4@custom");
+        txtSQLServerSenha.setColumns(10);
+        txtSQLServerSenha.setBounds(297, 188, 200, 20);
+        pnlSQLServer.add(txtSQLServerSenha);
 
-        sepFonteDados = new JSeparator();
-        sepFonteDados.setBounds(155, 248, 374, 2);
-        pnlFonteDados.add(sepFonteDados);
+        lblSQLServerBanco = new JLabel("Banco de Dados:");
+        lblSQLServerBanco.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblSQLServerBanco.setBounds(155, 219, 132, 14);
+        pnlSQLServer.add(lblSQLServerBanco);
 
-        btnFonteDadosTestarConexao = new JButton("Testar Conexão");
-        btnFonteDadosTestarConexao.addActionListener(e -> valFonteDadosConexao(true, false));
-        btnFonteDadosTestarConexao.setBounds(397, 261, 132, 23);
-        pnlFonteDados.add(btnFonteDadosTestarConexao);
+        cbxSQLServerBanco = new JComboBox<>();
+        cbxSQLServerBanco.setBounds(297, 217, 200, 20);
+        pnlSQLServer.add(cbxSQLServerBanco);
+
+        btnSQLServerAtualizarBanco = new JButton("...");
+        btnSQLServerAtualizarBanco.addActionListener(this::btnSQLServerAtualizarBancoActionPerformed);
+        btnSQLServerAtualizarBanco.setBounds(507, 217, 22, 20);
+        pnlSQLServer.add(btnSQLServerAtualizarBanco);
+
+        sepSQLServer = new JSeparator();
+        sepSQLServer.setBounds(155, 248, 374, 2);
+        pnlSQLServer.add(sepSQLServer);
+
+        btnSQLServerTestarConexao = new JButton("Testar Conexão");
+        btnSQLServerTestarConexao.addActionListener(e -> valSQLServerConexao(true, false));
+        btnSQLServerTestarConexao.setBounds(397, 261, 132, 23);
+        pnlSQLServer.add(btnSQLServerTestarConexao);
 
         pnlSyBase9 = new JPanel();
         pnlSyBase9.setBounds(144, 0, 630, 413);
@@ -378,16 +393,16 @@ public class App extends javax.swing.JFrame {
         pnlTabelas.setName("pnlTabelas");
         getContentPane().add(pnlTabelas);
 
-        lblFonteDadosTabelas = new JLabel("Tabelas disponíveis");
-        lblFonteDadosTabelas.setBounds(10, 11, 173, 14);
-        pnlTabelas.add(lblFonteDadosTabelas);
+        lblSQLServerTabelas = new JLabel("Tabelas disponíveis");
+        lblSQLServerTabelas.setBounds(10, 11, 173, 14);
+        pnlTabelas.add(lblSQLServerTabelas);
 
-        spFonteDados = new JScrollPane();
-        spFonteDados.setBounds(10, 36, 300, 328);
-        pnlTabelas.add(spFonteDados);
+        spSQLServer = new JScrollPane();
+        spSQLServer.setBounds(10, 36, 300, 328);
+        pnlTabelas.add(spSQLServer);
 
-        lstFonteDados = new JList<>();
-        spFonteDados.setViewportView(lstFonteDados);
+        lstSQLServer = new JList<>();
+        spSQLServer.setViewportView(lstSQLServer);
 
         lblSyBase9Tabelas = new JLabel("Tabelas a serem migradas");
         lblSyBase9Tabelas.setBounds(320, 11, 173, 14);
@@ -400,30 +415,30 @@ public class App extends javax.swing.JFrame {
         lstSyBase9 = new JList<>();
         spSyBase9.setViewportView(lstSyBase9);
 
-        btnFonteDadosAdicionaUm = new JButton(">");
-        btnFonteDadosAdicionaUm.addActionListener(e -> {
+        btnSQLServerAdicionaUm = new JButton(">");
+        btnSQLServerAdicionaUm.addActionListener(e -> {
             DefaultListModel<Tabela> tabsSyBase9 = (DefaultListModel<Tabela>) lstSyBase9.getModel();
-            for (Tabela tabela : lstFonteDados.getSelectedValuesList()) {
+            for (Tabela tabela : lstSQLServer.getSelectedValuesList()) {
                 if (!tabsSyBase9.contains(tabela)) {
                     tabsSyBase9.addElement(tabela);
                 }
             }
             lstSyBase9.setModel(tabsSyBase9);
         });
-        btnFonteDadosAdicionaUm.setBounds(199, 375, 50, 23);
-        pnlTabelas.add(btnFonteDadosAdicionaUm);
+        btnSQLServerAdicionaUm.setBounds(199, 375, 50, 23);
+        pnlTabelas.add(btnSQLServerAdicionaUm);
 
-        btnFonteDadosAdicionaTodos = new JButton(">>");
-        btnFonteDadosAdicionaTodos.addActionListener(e -> {
+        btnSQLServerAdicionaTodos = new JButton(">>");
+        btnSQLServerAdicionaTodos.addActionListener(e -> {
             DefaultListModel<Tabela> tabsSyBase9 = (DefaultListModel<Tabela>) lstSyBase9.getModel();
-            ListModel<Tabela> tabsFontDad = lstFonteDados.getModel();
-            for (int i = 0; i < tabsFontDad.getSize(); i++) {
-                tabsSyBase9.addElement(tabsFontDad.getElementAt(i));
+            ListModel<Tabela> tabsSQLServer = lstSQLServer.getModel();
+            for (int i = 0; i < tabsSQLServer.getSize(); i++) {
+                tabsSyBase9.addElement(tabsSQLServer.getElementAt(i));
             }
             lstSyBase9.setModel(tabsSyBase9);
         });
-        btnFonteDadosAdicionaTodos.setBounds(259, 375, 50, 23);
-        pnlTabelas.add(btnFonteDadosAdicionaTodos);
+        btnSQLServerAdicionaTodos.setBounds(259, 375, 50, 23);
+        pnlTabelas.add(btnSQLServerAdicionaTodos);
 
         btnSyBase9RemoveTodos = new JButton("<<");
         btnSyBase9RemoveTodos.addActionListener(e -> {
@@ -482,30 +497,30 @@ public class App extends javax.swing.JFrame {
         pnlMigracao.add(prbMigracaoLinhas);
     }
 
-    private boolean valFonteDados(boolean complete) {
-        if (txtFonteDadosHost.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Por favor, informe o host!", "Fonte de Dados",
+    private boolean valSQLServer(boolean complete) {
+        if (txtSQLServerHost.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Por favor, informe o host!", "SQL Server",
                     JOptionPane.WARNING_MESSAGE);
-            txtFonteDadosHost.requestFocus();
+            txtSQLServerHost.requestFocus();
             return false;
         }
-        if (txtFonteDadosUsuario.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Por favor, informe o usuário!", "Fonte de Dados",
+        if (txtSQLServerUsuario.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Por favor, informe o usuário!", "SQL Server",
                     JOptionPane.WARNING_MESSAGE);
-            txtFonteDadosUsuario.requestFocus();
+            txtSQLServerUsuario.requestFocus();
             return false;
         }
-        if (txtFonteDadosSenha.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Por favor, informe o senha!", "Fonte de Dados",
+        if (txtSQLServerSenha.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Por favor, informe o senha!", "SQL Server",
                     JOptionPane.WARNING_MESSAGE);
-            txtFonteDadosSenha.requestFocus();
+            txtSQLServerSenha.requestFocus();
             return false;
         }
         if (complete) {
-            if (cbxFonteDadosBanco.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(this, "Por favor, selecione um banco de dados!", "Fonte de Dados",
+            if (cbxSQLServerBanco.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(this, "Por favor, selecione um banco de dados!", "SQL Server",
                         JOptionPane.WARNING_MESSAGE);
-                cbxFonteDadosBanco.requestFocus();
+                cbxSQLServerBanco.requestFocus();
                 return false;
             }
         }
@@ -538,19 +553,19 @@ public class App extends javax.swing.JFrame {
         return true;
     }
 
-    private boolean valFonteDadosConexao(boolean showMessage, boolean complete) {
-        if (valFonteDados(complete)) {
-            if (cbxFonteDadosBanco.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(this, "Por favor, selecione um banco de dados!", "Fonte de Dados",
+    private boolean valSQLServerConexao(boolean showMessage, boolean complete) {
+        if (valSQLServer(complete)) {
+            if (cbxSQLServerBanco.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(this, "Por favor, selecione um banco de dados!", "SQL Server",
                         JOptionPane.WARNING_MESSAGE);
-                showPanel(tgbFonteDados, pnlFonteDados);
-                cbxFonteDadosBanco.requestFocus();
+                showPanel(tgbSQLServer, pnlSQLServer);
+                cbxSQLServerBanco.requestFocus();
                 return false;
             } else {
                 try {
-                    String Url = "jdbc:sqlserver://" + txtFonteDadosHost.getText() + ":1433;DatabaseName="
-                            + cbxFonteDadosBanco.getSelectedItem().toString() + ";user="
-                            + txtFonteDadosUsuario.getText() + ";Password=" + txtFonteDadosSenha.getText()
+                    String Url = "jdbc:sqlserver://" + txtSQLServerHost.getText() + ":1433;DatabaseName="
+                            + cbxSQLServerBanco.getSelectedItem().toString() + ";user="
+                            + txtSQLServerUsuario.getText() + ";Password=" + txtSQLServerSenha.getText()
                             + ";CharacterSet=UTF-8";
 
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -559,15 +574,15 @@ public class App extends javax.swing.JFrame {
                     prop.put("charSet", "iso-8859-1");
 
                     Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                    connFontDad = DriverManager.getConnection(Url, prop);
+                    connSQLServer = DriverManager.getConnection(Url, prop);
 
                     this.setCursor(Cursor.getDefaultCursor());
 
                     if (showMessage) {
                         JOptionPane.showMessageDialog(this,
                                 "Conexão estabelecida com sucesso! Info: "
-                                        + connFontDad.getMetaData().getDatabaseProductName(),
-                                "Fonte de Dados", JOptionPane.INFORMATION_MESSAGE);
+                                        + connSQLServer.getMetaData().getDatabaseProductName(),
+                                "SQL Server", JOptionPane.INFORMATION_MESSAGE);
                     }
                 } catch (HeadlessException | ClassNotFoundException | SQLException e) {
                     this.setCursor(Cursor.getDefaultCursor());
@@ -576,7 +591,7 @@ public class App extends javax.swing.JFrame {
                             .showMessageDialog(this,
                                     "<html><body><p style='width: 400px;'>Problemas ao se conectar!<br>"
                                             + e.getMessage() + "</p></body></html>",
-                                    "Fonte de Dados", JOptionPane.ERROR_MESSAGE);
+                                    "SQL Server", JOptionPane.ERROR_MESSAGE);
 
                     return false;
                 }
@@ -627,14 +642,14 @@ public class App extends javax.swing.JFrame {
 
     private void showPanel(JToggleButton tglbtn, JPanel pnl) {
         tgbInicio.setSelected(false);
-        tgbFonteDados.setSelected(false);
+        tgbSQLServer.setSelected(false);
         tgbSyBase9.setSelected(false);
         tgbTabelas.setSelected(false);
         tgbMigracao.setSelected(false);
         tglbtn.setSelected(true);
 
         pnlInicio.setVisible(false);
-        pnlFonteDados.setVisible(false);
+        pnlSQLServer.setVisible(false);
         pnlSyBase9.setVisible(false);
         pnlTabelas.setVisible(false);
         pnlMigracao.setVisible(false);
@@ -649,7 +664,7 @@ public class App extends javax.swing.JFrame {
                 btnVoltar.setText("Voltar");
                 btnAvancar.setText("Avançar");
                 break;
-            case "pnlFonteDados":
+            case "pnlSQLServer":
             case "pnlSyBase9":
                 btnVoltar.setEnabled(true);
                 btnAvancar.setEnabled(true);
@@ -676,21 +691,44 @@ public class App extends javax.swing.JFrame {
             case "Avanc":
                 switch (pnlOpened.getName()) {
                     case "pnlInicio":
-                        showPanel(tgbFonteDados, pnlFonteDados);
+                        switch (direcao.getId()) {
+                            case 1:
+                                showPanel(tgbSQLServer, pnlSQLServer);
+                                break;
+                            case 2:
+                                showPanel(tgbSyBase9, pnlSyBase9);
+                                break;
+                        }
                         break;
-                    case "pnlFonteDados":
-                        if (valFonteDadosConexao(false, true)) {
-                            showPanel(tgbSyBase9, pnlSyBase9);
+                    case "pnlSQLServer":
+                        if (valSQLServerConexao(false, true)) {
+                            switch (direcao.getId()) {
+                                case 1:
+                                    showPanel(tgbSyBase9, pnlSyBase9);
+                                    break;
+                                case 2:
+                                    showPanel(tgbTabelas, pnlTabelas);
+                                    loadTables();
+                                    break;
+                            }
                         }
                         break;
                     case "pnlSyBase9":
                         if (valSyBase9Conexao(false)) {
-                            showPanel(tgbTabelas, pnlTabelas);
-                            loadTables();
+                            switch (direcao.getId()) {
+                                case 1:
+                                    showPanel(tgbTabelas, pnlTabelas);
+                                    loadTables();
+                                    break;
+                                case 2:
+                                    showPanel(tgbSQLServer, pnlSQLServer);
+                                    break;
+                            }
+
                         }
                         break;
                     case "pnlTabelas":
-                        if (valFonteDadosConexao(false, true) && valSyBase9Conexao(false)) {
+                        if (valSQLServerConexao(false, true) && valSyBase9Conexao(false)) {
                             showPanel(tgbMigracao, pnlMigracao);
                             execMig();
                         }
@@ -700,14 +738,35 @@ public class App extends javax.swing.JFrame {
 
             case "Volt":
                 switch (pnlOpened.getName()) {
-                    case "pnlFonteDados":
-                        showPanel(tgbInicio, pnlInicio);
+                    case "pnlSQLServer":
+                        switch (direcao.getId()) {
+                            case 1:
+                                showPanel(tgbInicio, pnlInicio);
+                                break;
+                            case 2:
+                                showPanel(tgbSyBase9, pnlSyBase9);
+                                break;
+                        }
                         break;
                     case "pnlSyBase9":
-                        showPanel(tgbFonteDados, pnlFonteDados);
+                        switch (direcao.getId()) {
+                            case 1:
+                                showPanel(tgbSQLServer, pnlSQLServer);
+                                break;
+                            case 2:
+                                showPanel(tgbInicio, pnlInicio);
+                                break;
+                        }
                         break;
                     case "pnlTabelas":
-                        showPanel(tgbSyBase9, pnlSyBase9);
+                        switch (direcao.getId()) {
+                            case 1:
+                                showPanel(tgbSyBase9, pnlSyBase9);
+                                break;
+                            case 2:
+                                showPanel(tgbSQLServer, pnlSQLServer);
+                                break;
+                        }
                         break;
                     case "pnlMigracao":
                         switch (btnVoltar.getText()) {
@@ -730,31 +789,68 @@ public class App extends javax.swing.JFrame {
         try {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            DatabaseMetaData md = connFontDad.getMetaData();
-            ResultSet rsTab = md.getTables(null, null, "%", new String[]{"TABLE"});
-            DefaultListModel<Tabela> tabsFontDad = new DefaultListModel<>();
-            DefaultListModel<Tabela> tabsSyBase9 = new DefaultListModel<>();
-            while (rsTab.next()) {
-                if (!rsTab.getString("TABLE_NAME").toLowerCase().contains(txtFiltro.getText().toLowerCase()) && !rsTab.getString("TABLE_SCHEM").equals("sys")) {
-                    Tabela tabela = new Tabela(rsTab.getString("TABLE_SCHEM"), rsTab.getString("TABLE_NAME"), txtPrefixo.getText());
-                    ResultSet rsCol = md.getColumns(null, tabela.getSchema(), tabela.getNome(), null);
-                    Coluna col;
-                    while (rsCol.next()) {
-                        col = new Coluna(FontDad.SQLServer, rsCol);
-                        tabela.adicCol(col);
-                    }
-                    tabsFontDad.addElement(tabela);
-                }
+            DatabaseMetaData md = null;
+            switch (direcao.getId()) {
+                case 1:
+                    md = connSQLServer.getMetaData();
+                    break;
+                case 2:
+                    md = connSyBase9.getMetaData();
+                    break;
             }
-            lstFonteDados.setModel(tabsFontDad);
-            lstSyBase9.setModel(tabsSyBase9);
+
+            if (md != null) {
+                ResultSet rsTab = md.getTables(null, null, "%", new String[]{"TABLE"});
+                DefaultListModel<Tabela> tabsSQLServer = new DefaultListModel<>();
+                DefaultListModel<Tabela> tabsSyBase9 = new DefaultListModel<>();
+                while (rsTab.next()) {
+                    switch (direcao.getId()) {
+                        case 1:
+                            if (!rsTab.getString("TABLE_NAME").toLowerCase().contains(txtFiltro.getText().toLowerCase()) && !rsTab.getString("TABLE_SCHEM").equals("sys")) {
+                                Tabela tabela = new Tabela(rsTab.getString("TABLE_SCHEM"), rsTab.getString("TABLE_NAME"), txtPrefixo.getText());
+                                ResultSet rsCol = md.getColumns(null, tabela.getSchema(), tabela.getNome(), null);
+                                Coluna col;
+                                while (rsCol.next()) {
+                                    col = new Coluna(FontDad.SQLServer, rsCol);
+                                    tabela.adicCol(col);
+                                }
+                                tabsSQLServer.addElement(tabela);
+                            }
+                            break;
+                        case 2:
+                            if (!rsTab.getString("TABLE_NAME").toLowerCase().trim().contains(txtFiltro.getText().toLowerCase()) && rsTab.getString("TABLE_SCHEM").equals("bethadba")) {
+                                Tabela tabela = new Tabela(rsTab.getString("TABLE_SCHEM"), rsTab.getString("TABLE_NAME"), txtPrefixo.getText());
+                                ResultSet rsCol = md.getColumns(null, tabela.getSchema(), tabela.getNome(), null);
+                                Coluna col;
+                                System.out.println(tabela);
+                                if (tabela.getNome().equals("btls_cf")) {
+                                    while (rsCol.next()) {
+                                        col = new Coluna(FontDad.SyBase9, rsCol);
+                                        System.out.println("  -> " + col);
+                                        tabela.adicCol(col);
+                                    }
+                                }
+                                tabsSyBase9.addElement(tabela);
+                            }
+                            break;
+                    }
+                }
+                lstSQLServer.setModel(tabsSQLServer);
+                lstSyBase9.setModel(tabsSyBase9);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "<html><body><p style='width: 400px;'>Problemas ao carregar tabelas!<br>Não foi possível acessar os meta dados.</p></body></html>",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
             this.setCursor(Cursor.getDefaultCursor());
-        } catch (SQLException e) {
+        } catch (NullPointerException | SQLException e) {
             JOptionPane.showMessageDialog(this,
                     "<html><body><p style='width: 400px;'>Problemas ao carregar tabelas!<br>" + e.getMessage()
                             + "</p></body></html>",
                     "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            this.setCursor(Cursor.getDefaultCursor());
         }
     }
 
@@ -783,7 +879,7 @@ public class App extends javax.swing.JFrame {
                     prbMigracaoLinhas.setString("");
 
                     try (
-                            Statement stmtFontDad = connFontDad.createStatement()
+                            Statement stmtSQLServer = connSQLServer.createStatement()
                     ) {
                         txaMigracao.append("Migrando tabela: " + tabela.toString() + " - " + Util.getCurrentDateTime() + "\n");
                         txaMigracao.setCaretPosition(txaMigracao.getDocument().getLength());
@@ -794,7 +890,7 @@ public class App extends javax.swing.JFrame {
 
                         sql = "SELECT COUNT(*) over (partition by 1) [rowTotal], * FROM " + tabela.getSchema() + "."
                                 + tabela.getNome();
-                        rs = stmtFontDad.executeQuery(sql);
+                        rs = stmtSQLServer.executeQuery(sql);
 
                         prbMigracaoLinhas.setValue(0);
                         prbMigracaoLinhas.setString("");
@@ -840,7 +936,7 @@ public class App extends javax.swing.JFrame {
             @Override
             protected void done() {
                 try {
-                    if (connFontDad != null) connFontDad.close();
+                    if (connSQLServer != null) connSQLServer.close();
                     if (connSyBase9 != null) connSyBase9.close();
 
                     if (swMig.isCancelled()) {
@@ -862,12 +958,28 @@ public class App extends javax.swing.JFrame {
         swMig.execute();
     }
 
-    private void btnFonteDadosAtualizarBancoActionPerformed(java.awt.event.ActionEvent evt) {
-        if (valFonteDados(false)) {
+    private void setCbxDirecaoActionPerformed(java.awt.event.ActionEvent evt) {
+        direcao = (Direcao) cbxDirecao.getSelectedItem();
+        if (direcao != null) {
+            switch (direcao.getId()) {
+                case 1:
+                    tgbSQLServer.setBounds(10, 45, 125, 23);
+                    tgbSyBase9.setBounds(10, 79, 125, 23);
+                    break;
+                case 2:
+                    tgbSQLServer.setBounds(10, 79, 125, 23);
+                    tgbSyBase9.setBounds(10, 45, 125, 23);
+                    break;
+            }
+        }
+    }
+
+    private void btnSQLServerAtualizarBancoActionPerformed(java.awt.event.ActionEvent evt) {
+        if (valSQLServer(false)) {
             ResultSet rs;
             try {
-                String Url = "jdbc:sqlserver://" + txtFonteDadosHost.getText() + ":1433;user="
-                        + txtFonteDadosUsuario.getText() + ";Password=" + txtFonteDadosSenha.getText();
+                String Url = "jdbc:sqlserver://" + txtSQLServerHost.getText() + ":1433;user="
+                        + txtSQLServerUsuario.getText() + ";Password=" + txtSQLServerSenha.getText();
 
                 this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -876,9 +988,9 @@ public class App extends javax.swing.JFrame {
 
                 DatabaseMetaData meta = conn.getMetaData();
                 rs = meta.getCatalogs();
-                cbxFonteDadosBanco.removeAllItems();
+                cbxSQLServerBanco.removeAllItems();
                 while (rs.next()) {
-                    cbxFonteDadosBanco.addItem(rs.getString("TABLE_CAT"));
+                    cbxSQLServerBanco.addItem(rs.getString("TABLE_CAT"));
                 }
                 rs.close();
 

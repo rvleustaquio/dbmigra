@@ -18,6 +18,9 @@ public class Coluna {
 		try {
 			this.fontDad = fontDad;
 			this.nome = "[" + rsCol.getString("COLUMN_NAME") + "]";
+			System.out.println(rsCol.getString("TYPE_NAME"));
+			System.out.println(rsCol.getString("SQL_DATA_TYPE"));
+			System.out.println(rsCol.getString("DATA_TYPE"));
 			this.tipo = rsCol.getString("TYPE_NAME").replace("(", "").replace(")", "").replace("identity", "").trim();
 			this.tamanho = rsCol.getInt("COLUMN_SIZE");
 			this.precisao = rsCol.getInt("DECIMAL_DIGITS");
@@ -106,6 +109,51 @@ public class Coluna {
 						break;
 				}
 				break;
+			case SyBase9:
+				switch (this.getTipo()) {
+					case "tinyint":
+					case "smallint":
+					case "int":
+					case "bigint":
+					case "date":
+					case "time":
+					case "bit":
+					case "datetime":
+					case "smalldatetime":
+					case "text":
+					case "float":
+					case "double":
+					case "money":
+					case "image":
+					case "timestamp":
+					case "real":
+						rs = this.getNome() + " " + this.getTipo() + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					case "decimal":
+					case "numeric":
+						rs = this.getNome() + " " + this.getTipo() + "(" + this.getTamanho() + "," + this.getPrecisao()
+								+ ")" + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					case "nchar":
+					case "long varchar":
+						rs = this.getNome() + " NVARCHAR(9999)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					case "varbinary":
+						rs = this.getNome() + " VARBINARY(9999)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					case "ntext":
+						rs = this.getNome() + " TEXT" + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					case "uniqueidentifier":
+						rs = this.getNome() + " VARCHAR(99)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+					default:
+						rs = this.getNome() + " " + this.getTipo() + "("
+								+ (Math.min(this.getTamanho(), 9999)) + ")"
+								+ (this.isNotNullable() ? " NOT NULL" : " NULL");
+						break;
+				}
+				break;
 		}
 		return rs;
 	}
@@ -130,6 +178,26 @@ public class Coluna {
 						case "varbinary":
 						case "text":
 						case "ntext":
+						case "image":
+						case "uniqueidentifier":
+							str = "'" + str + "'";
+							break;
+					}
+					str = str.replace(Character.toString((char) 65533), "");
+					break;
+				case SyBase9:
+					str = rs.getString(this.getNome().replace("[", "").replace("]", "")).replace("'", "");
+					switch (this.getTipo()) {
+						case "char":
+						case "varchar":
+						case "long varchar":
+						case "date":
+						case "time":
+						case "datetime":
+						case "smalldatetime":
+						case "timestamp":
+						case "varbinary":
+						case "text":
 						case "image":
 						case "uniqueidentifier":
 							str = "'" + str + "'";
