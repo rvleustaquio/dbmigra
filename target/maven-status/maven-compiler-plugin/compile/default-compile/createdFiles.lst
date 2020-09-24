@@ -1,7 +1,10 @@
 com\rvleustaquio\dbmigra\enums\FontDad.class
 com\rvleustaquio\dbmigra\model\Coluna.class
+com\rvleustaquio\dbmigra\App$2.class
 com\rvleustaquio\dbmigra\model\Coluna$1.class
+com\rvleustaquio\dbmigra\model\Tabela$1.class
 com\rvleustaquio\dbmigra\App.class
 com\rvleustaquio\dbmigra\utils\Util.class
 com\rvleustaquio\dbmigra\model\Tabela.class
+com\rvleustaquio\dbmigra\utils\Configs.class
 com\rvleustaquio\dbmigra\App$1.class
