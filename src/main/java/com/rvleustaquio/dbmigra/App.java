@@ -998,6 +998,8 @@ public class App extends javax.swing.JFrame {
                         if (!swMig.isCancelled()) {
                             txaMigracao.append("Erro: " + e.getMessage() + "\n" + "SQL: " + sql + "\n");
                             txaMigracao.setCaretPosition(txaMigracao.getDocument().getLength());
+
+                            System.out.println(sqlRow.toString());
                         }
                     } finally {
                         if (rs != null) rs.close();
@@ -1032,22 +1034,6 @@ public class App extends javax.swing.JFrame {
 
         swMig.execute();
     }
-
-//    private void setCbxDirecaoActionPerformed(java.awt.event.ActionEvent evt) {
-//        direcao = (FontDad) cbxDirecao.getSelectedItem();
-//        if (direcao != null) {
-//            switch (direcao) {
-//                case SQLServer:
-//                    tgbSQLServer.setBounds(10, 45, 125, 23);
-//                    tgbSyBase9.setBounds(10, 79, 125, 23);
-//                    break;
-//                case SyBase9:
-//                    tgbSQLServer.setBounds(10, 79, 125, 23);
-//                    tgbSyBase9.setBounds(10, 45, 125, 23);
-//                    break;
-//            }
-//        }
-//    }
 
     private void changeDirecao() {
         direcao = (FontDad) cbxDirecao.getSelectedItem();

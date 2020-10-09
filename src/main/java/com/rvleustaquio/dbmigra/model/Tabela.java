@@ -44,7 +44,7 @@ public class Tabela {
                 sb.append("IF EXISTS (SELECT 1 FROM sysobjects WHERE name = '").append(this.prefix).append(this.schema).append("_").append(this.nome).append("' AND type = 'U') THEN EXECUTE('DROP TABLE ").append(this.prefix).append(this.schema).append("_").append(this.nome).append("'); END IF;");
                 break;
             case SyBase9:
-                sb.append("DROP TABLE IF EXISTS ").append(this.prefix).append("_").append(this.nome);
+                sb.append("DROP TABLE IF EXISTS ").append(this.prefix).append(this.schema).append("_").append(this.nome);
                 break;
         }
 
@@ -55,14 +55,7 @@ public class Tabela {
         StringBuilder sb = new StringBuilder();
         int colLen = colunas.size();
 
-        switch (getFontDad()) {
-            case SQLServer:
-                sb.append("CREATE TABLE ").append(this.prefix).append(this.schema).append("_").append(this.nome).append(" (");
-                break;
-            case SyBase9:
-                sb.append("CREATE TABLE ").append(this.prefix).append("_").append(this.nome).append(" (");
-                break;
-        }
+        sb.append("CREATE TABLE ").append(this.prefix).append(this.schema).append("_").append(this.nome).append(" (");
 
         for(int i = 0; i < colLen; i++) {
             sb.append(colunas.get(i).toSQLCreate());
@@ -77,14 +70,7 @@ public class Tabela {
         StringBuilder sb = new StringBuilder();
         int colLen = colunas.size();
 
-        switch (getFontDad()) {
-            case SQLServer:
-                sb.append("INSERT INTO ").append(this.prefix).append(this.schema).append("_").append(this.nome).append(" (");
-                break;
-            case SyBase9:
-                sb.append("INSERT INTO ").append(this.prefix).append("_").append(this.nome).append(" (");
-                break;
-        }
+        sb.append("INSERT INTO ").append(this.prefix).append(this.schema).append("_").append(this.nome).append(" (");
 
         for(int i = 0; i < colLen; i++) {
             sb.append(colunas.get(i).getNome());

@@ -190,16 +190,18 @@ public class Coluna {
                         case "char":
                         case "varchar":
                         case "long varchar":
-                        case "date":
-                        case "time":
-                        case "datetime":
-                        case "timestamp":
-                        case "smalldatetime":
                         case "varbinary":
                         case "text":
                         case "image":
                         case "uniqueidentifier":
+                        case "date":
+                        case "time":
+                        case "datetime":
+                        case "smalldatetime":
                             str = "'" + str + "'";
+                            break;
+                        case "timestamp":
+                            str = "convert(datetime, '" + str + "')";
                             break;
                     }
                     str = str.replace(Character.toString((char) 65533), "");
