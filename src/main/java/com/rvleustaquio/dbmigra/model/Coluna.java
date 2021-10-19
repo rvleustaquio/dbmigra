@@ -134,6 +134,7 @@ public class Coluna {
                     case "long varchar":
                         rs = this.getNome() + " NVARCHAR(max)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
                         break;
+                    case "long binary":
                     case "varbinary":
                         rs = this.getNome() + " VARBINARY(max)" + (this.isNotNullable() ? " NOT NULL" : " NULL");
                         break;
@@ -197,6 +198,9 @@ public class Coluna {
                         case "date":
                         case "time":
                         case "datetime":
+                        case "long binary":
+                            str = "CAST(N'" + str + "' as VARBINARY(MAX))";
+                            break;
                         case "smalldatetime":
                             str = "'" + str + "'";
                             break;
@@ -204,7 +208,7 @@ public class Coluna {
                             str = "convert(datetime, '" + str + "')";
                             break;
                     }
-                    str = str.replace(Character.toString((char) 65533), "");
+//                    str = str.replace(Character.toString((char) 65533), "");
                     break;
             }
         } catch (Exception e) {

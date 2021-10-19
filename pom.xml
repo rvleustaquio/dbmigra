@@ -20,7 +20,7 @@
     <dependency>
       <groupId>SyBaseASA</groupId>
       <artifactId>jconn</artifactId>
-      <version>4</version>
+      <version>4.0</version>
     </dependency>
 
     <dependency>
